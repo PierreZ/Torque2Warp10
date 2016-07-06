@@ -42,7 +42,7 @@ var (
 )
 
 func main() {
-	http.HandleFunc("/", query)
+	http.HandleFunc("/api/torque", query)
 	http.ListenAndServe(":8080", nil)
 }
 
