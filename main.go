@@ -65,6 +65,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 			sendToWarp10(GTS{time, latitude, longitude, altitude, val.MetricName, val.Tag, r.URL.Query().Get(key)})
 		}
 	}
+	w.Write([]byte("OK!"))
 }
 
 // sendToWarp10 is used to push a GTS to a Warp10 datastore
@@ -84,6 +85,7 @@ func sendToWarp10(gts GTS) {
 func init() {
 
 	torqueKeys = make(map[string]TorqueKey)
+
 	// Checking env var
 	if len(warp10Endpoint) == 0 || len(warp10Token) == 0 {
 		log.Println("You moron forget to put the tokens!")
