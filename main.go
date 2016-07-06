@@ -83,6 +83,7 @@ func sendToWarp10(gts GTS) {
 // init is used to load a map to bind Torque's keys to appropriate name for metrics
 func init() {
 
+	torqueKeys = make(map[string]TorqueKey)
 	// Checking env var
 	if len(warp10Endpoint) == 0 || len(warp10Token) == 0 {
 		log.Println("You moron forget to put the tokens!")
@@ -110,8 +111,11 @@ func init() {
 	}
 
 	// Let's feed our slice !
-	for _, each := range rawCSVdata {
-		log.Printf("%s: %s - %s\n", each[0], each[1], each[2])
-		torqueKeys[each[0]] = TorqueKey{each[1], each[2]}
+	for key, each := range rawCSVdata {
+		// Avoid first line
+		if key != 0 {
+			log.Printf("%s: %s - %s\n", each[0], each[1], each[2])
+			torqueKeys[each[0]] = TorqueKey{each[1], each[2]}
+		}
 	}
 }
