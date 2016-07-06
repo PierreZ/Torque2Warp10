@@ -23,6 +23,7 @@ type GTS struct {
 // Print respects the following format:
 // TS/LAT:LON/ELEV NAME{LABELS} VALUE
 func (gts GTS) Print() []byte {
+	log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 	return []byte(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 }
 
@@ -38,6 +39,7 @@ type TorqueKeys map[string]TorqueKey
 var (
 	warp10Endpoint = os.Getenv("WARP10_ENDPOINT")
 	warp10Token    = os.Getenv("WARP10_TOKEN")
+	email          = os.Getenv("AUTHORIZED_EMAIL")
 	torqueKeys     TorqueKeys
 )
 
@@ -47,16 +49,24 @@ func main() {
 }
 
 func query(w http.ResponseWriter, r *http.Request) {
+
+	if r.URL.Query().Get("eml") != email {
+		log.Println("unauthorized")
+		return
+	}
 	// kff1005 refers to longitude
 	// kff1006 refers to latitude
 	// kff1010 refers to altitude
+
 	longitude := r.URL.Query().Get("kff1005")
 	latitude := r.URL.Query().Get("kff1006")
 	altitude := r.URL.Query().Get("kff1010")
 	time := r.URL.Query().Get("time")
 
 	query := r.URL.Query()
-	log.Println(query)
+	if len(query) > 0 {
+		log.Println(query)
+	}
 
 	// Let's loop all the GET parameters!
 	for key := range query {
@@ -71,7 +81,6 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 // sendToWarp10 is used to push a GTS to a Warp10 datastore
 func sendToWarp10(gts GTS) {
-	log.Println(gts.Print())
 	req, err := http.NewRequest("POST", warp10Endpoint+"/api/v0/update", bytes.NewBuffer(gts.Print()))
 	req.Header.Set("X-Warp10-Token", warp10Token)
 	client := &http.Client{}
