@@ -66,6 +66,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	altitude := string(int64(i * 1000.0))
+	log.Println("Altitude is", altitude)
 	time := r.URL.Query().Get("time")
 
 	query := r.URL.Query()
@@ -90,6 +91,7 @@ func sendToWarp10(gts GTS) {
 	req.Header.Set("X-Warp10-Token", warp10Token)
 	client := &http.Client{}
 	resp, err := client.Do(req)
+	log.Println("HTTP Response from Warp10: " + resp.Status)
 	if err != nil {
 		panic(err)
 	}
