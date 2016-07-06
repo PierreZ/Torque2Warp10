@@ -65,6 +65,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 			sendToWarp10(GTS{time, latitude, longitude, altitude, val.MetricName, val.Tag, r.URL.Query().Get(key)})
 		}
 	}
+	w.Header().Set("Content-Type", "text/html")
 	w.Write([]byte("OK!"))
 }
 
