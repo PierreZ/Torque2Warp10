@@ -61,11 +61,11 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 	longitude := r.URL.Query().Get("kff1005")
 	latitude := r.URL.Query().Get("kff1006")
-	i, err := strconv.ParseFloat(r.URL.Query().Get("kff1010"), 10)
+	i, err := strconv.ParseFloat(r.URL.Query().Get("kff1010"), 64)
 	if err != nil {
 		log.Println(err)
 	}
-	altitude := string(int64(i * 1000.0))
+	altitude := strconv.Itoa(int(i * 1000.0))
 	log.Println("Altitude is", altitude)
 	time := r.URL.Query().Get("time")
 
