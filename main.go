@@ -65,7 +65,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	altitude := string(i * 1000.0)
+	altitude := string(int64(i * 1000.0))
 	time := r.URL.Query().Get("time")
 
 	query := r.URL.Query()
