@@ -24,7 +24,7 @@ type GTS struct {
 // Print respects the following format:
 // TS/LAT:LON/ELEV NAME{LABELS} VALUE
 func (gts GTS) Print() []byte {
-	log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
+	// log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 	return []byte(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 }
 
@@ -66,7 +66,6 @@ func query(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 	altitude := strconv.Itoa(int(i * 1000.0))
-	log.Println("Altitude is", altitude)
 	time := r.URL.Query().Get("time")
 
 	query := r.URL.Query()
@@ -91,16 +90,17 @@ func sendToWarp10(gts GTS) {
 	req.Header.Set("X-Warp10-Token", warp10Token)
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	log.Println("HTTP Response from Warp10: " + resp.Status)
+	if resp.StatusCode != 200 {
+		log.Panicln("Error", resp.StatusCode, ":", resp.Body)
+	}
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer resp.Body.Close()
 }
 
 // init is used to load a map to bind Torque's keys to appropriate name for metrics
 func init() {
-
 	torqueKeys = make(map[string]TorqueKey)
 
 	// Checking env var
@@ -124,8 +124,7 @@ func init() {
 	rawCSVdata, err := reader.ReadAll()
 
 	if err != nil {
-		log.Println("Error in parsing:")
-		log.Println(err)
+		log.Println("Error in parsing:", err)
 		os.Exit(1)
 	}
 
