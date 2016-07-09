@@ -25,7 +25,7 @@ type GTS struct {
 // Print respects the following format:
 // TS/LAT:LON/ELEV NAME{LABELS} VALUE
 func (gts GTS) Print() []byte {
-	log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
+	// log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 	return []byte(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 }
 
@@ -72,7 +72,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK!"))
 		return
 	}
-	log.Println("longitude:", r.URL.Query().Get("kff1005"), "latitude:", r.URL.Query().Get("kff1006"), "elevation:", r.URL.Query().Get("kff1010"))
+	// log.Println("longitude:", r.URL.Query().Get("kff1005"), "latitude:", r.URL.Query().Get("kff1006"), "elevation:", r.URL.Query().Get("kff1010"))
 	// kff1005 refers to longitude
 	// kff1006 refers to latitude
 	// kff1010 refers to altitude
