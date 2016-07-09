@@ -172,7 +172,7 @@ func init() {
 	for key, each := range rawCSVdata {
 		// Avoid first line
 		if key != 0 {
-			log.Printf("%s: %s - %s\n", each[0], each[1], each[2])
+			// log.Printf("%s: %s - %s\n", each[0], each[1], each[2])
 			torqueKeys[each[0]] = TorqueKey{each[1], each[2]}
 		}
 	}
