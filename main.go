@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 // GTS is a representation of a Geo Time Series
@@ -55,33 +54,36 @@ func query(w http.ResponseWriter, r *http.Request) {
 		log.Println("unauthorized")
 		return
 	}
+
+	log.Println("longitude:", r.URL.Query().Get("kff1005"), "latitude:", r.URL.Query().Get("kff1006"), "elevation:", r.URL.Query().Get("kff1010"))
+	return
 	// kff1005 refers to longitude
 	// kff1006 refers to latitude
 	// kff1010 refers to altitude
 
-	longitude := r.URL.Query().Get("kff1005")
-	latitude := r.URL.Query().Get("kff1006")
-	i, err := strconv.ParseFloat(r.URL.Query().Get("kff1010"), 64)
-	if err != nil {
-		log.Println(err)
-	}
-	altitude := strconv.Itoa(int(i * 1000.0))
-	time := r.URL.Query().Get("time")
-
-	query := r.URL.Query()
-	if len(query) > 0 {
-		log.Println(query)
-	}
-
-	// Let's loop all the GET parameters!
-	for key := range query {
-		// We need to map the deviceID with metric Name
-		if val, ok := torqueKeys[key]; ok {
-			sendToWarp10(GTS{time, latitude, longitude, altitude, val.MetricName, val.Tag, r.URL.Query().Get(key)})
-		}
-	}
-	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte("OK!"))
+	// longitude := r.URL.Query().Get("kff1005")
+	// latitude := r.URL.Query().Get("kff1006")
+	// i, err := strconv.ParseFloat(r.URL.Query().Get("kff1010"), 64)
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+	// altitude := strconv.Itoa(int(i * 1000.0))
+	// time := r.URL.Query().Get("time")
+	//
+	// query := r.URL.Query()
+	// if len(query) > 0 {
+	// 	log.Println(query)
+	// }
+	//
+	// // Let's loop all the GET parameters!
+	// for key := range query {
+	// 	// We need to map the deviceID with metric Name
+	// 	if val, ok := torqueKeys[key]; ok {
+	// 		sendToWarp10(GTS{time, latitude, longitude, altitude, val.MetricName, val.Tag, r.URL.Query().Get(key)})
+	// 	}
+	// }
+	// w.Header().Set("Content-Type", "text/html")
+	// w.Write([]byte("OK!"))
 }
 
 // sendToWarp10 is used to push a GTS to a Warp10 datastore
