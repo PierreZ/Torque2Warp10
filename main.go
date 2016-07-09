@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // GTS is a representation of a Geo Time Series
@@ -24,7 +25,7 @@ type GTS struct {
 // Print respects the following format:
 // TS/LAT:LON/ELEV NAME{LABELS} VALUE
 func (gts GTS) Print() []byte {
-	// log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
+	log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 	return []byte(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 }
 
@@ -37,11 +38,15 @@ type TorqueKey struct {
 // TorqueKeys is the slice of TorqueKey
 type TorqueKeys map[string]TorqueKey
 
+// Users represents all the Torque users allowed.
+// A Torque user is represent by an ID and a email
+type Users []string
+
 var (
 	warp10Endpoint = os.Getenv("WARP10_ENDPOINT")
 	warp10Token    = os.Getenv("WARP10_TOKEN")
-	email          = os.Getenv("AUTHORIZED_EMAIL")
 	torqueKeys     TorqueKeys
+	users          Users
 )
 
 func main() {
@@ -50,10 +55,12 @@ func main() {
 }
 
 func query(w http.ResponseWriter, r *http.Request) {
-
-	if r.URL.Query().Get("eml") != email {
+	// Does the user is authorized?
+	if stringInSlice(r.URL.Query().Get("eml"), users) {
 		log.Println("unauthorized")
 		w.Header().Set("Content-Type", "text/html")
+		// Torque is pushing data without info sometimes, and it's always trying to
+		// push them, so we need to ack them even we don't nned them
 		w.Write([]byte("OK!"))
 		return
 	}
@@ -69,7 +76,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 	// kff1005 refers to longitude
 	// kff1006 refers to latitude
 	// kff1010 refers to altitude
-
+	id := r.URL.Query().Get("id")
 	longitude := r.URL.Query().Get("kff1005")
 	latitude := r.URL.Query().Get("kff1006")
 	i, err := strconv.ParseFloat(r.URL.Query().Get("kff1010"), 64)
@@ -86,6 +93,14 @@ func query(w http.ResponseWriter, r *http.Request) {
 	for key := range query {
 		// We need to map the deviceID with metric Name
 		if val, ok := torqueKeys[key]; ok {
+
+			// ID is part of the tags
+			if (len(val.Tag)) == 0 {
+				val.Tag = "id=" + id
+			} else {
+				val.Tag = "id=" + id + "," + val.Tag
+			}
+
 			sendToWarp10(GTS{time, latitude, longitude, altitude, val.MetricName, val.Tag, r.URL.Query().Get(key)})
 		}
 	}
@@ -110,6 +125,22 @@ func sendToWarp10(gts GTS) {
 
 // init is used to load a map to bind Torque's keys to appropriate name for metrics
 func init() {
+
+	// Get Allowed users
+	// Env is like this:
+	// email1,email2,email3
+	env := os.Getenv("ALLOWED_USERS")
+	// Split on comma.
+	result := strings.Split(env, ",")
+	for _, user := range result {
+		users = append(users, user)
+	}
+
+	if len(users) == 0 {
+		log.Panicln("No User registered!")
+	}
+
+	// Get Torque Keys
 	torqueKeys = make(map[string]TorqueKey)
 
 	// Checking env var
@@ -145,4 +176,13 @@ func init() {
 			torqueKeys[each[0]] = TorqueKey{each[1], each[2]}
 		}
 	}
+}
+
+func stringInSlice(str string, list []string) bool {
+	for _, v := range list {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
