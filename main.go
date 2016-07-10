@@ -111,6 +111,7 @@ func sendToWarp10(gts GTS) {
 	if err != nil {
 		log.Println(err)
 	}
+	log.Println("HTTP Return code", resp.StatusCode, "-", gts.Name, ":", gts.Value)
 	defer resp.Body.Close()
 }
 
