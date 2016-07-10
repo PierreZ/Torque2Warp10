@@ -55,9 +55,13 @@ func main() {
 
 func query(w http.ResponseWriter, r *http.Request) {
 
+	log.Println("Received a call HTTP, GET Keys:")
+	log.Println(r.URL.Query())
+	log.Println("Does eml == user?")
+	log.Println(r.URL.Query().Get("eml") == user)
 	// Data are useless if they're not geolocalized or user is not authorized
 	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 || r.URL.Query().Get("eml") == user {
-		// log.Println("No GPS Data, moving on")
+		log.Println("No GPS Data, moving on")
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte("OK!"))
 		return
@@ -116,6 +120,8 @@ func sendToWarp10(gts GTS) {
 
 // init is used to load a map to bind Torque's keys to appropriate name for metrics
 func init() {
+
+	log.Println("New user", user)
 
 	// Get Torque Keys
 	torqueKeys = make(map[string]TorqueKey)
