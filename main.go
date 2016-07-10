@@ -25,7 +25,7 @@ type GTS struct {
 // Print respects the following format:
 // TS/LAT:LON/ELEV NAME{LABELS} VALUE
 func (gts GTS) Print() []byte {
-	// log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
+	log.Println(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 	return []byte(gts.TS + "/" + gts.Lat + ":" + gts.Long + "/" + gts.Elev + " " + gts.Name + "{" + gts.Labels + "}" + " " + gts.Value)
 }
 
@@ -55,19 +55,10 @@ func main() {
 }
 
 func query(w http.ResponseWriter, r *http.Request) {
-	// Does the user is authorized?
-	if stringInSlice(r.URL.Query().Get("eml"), users) {
-		log.Println("unauthorized")
-		w.Header().Set("Content-Type", "text/html")
-		// Torque is pushing data without info sometimes, and it's always trying to
-		// push them, so we need to ack them even we don't nned them
-		w.Write([]byte("OK!"))
-		return
-	}
 
-	// Data are useless if they're not geolocalized
-	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 {
-		log.Println("No GPS Data, moving on")
+	// Data are useless if they're not geolocalized or user is not authorized
+	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 || stringInSlice(r.URL.Query().Get("eml"), users) {
+		// log.Println("No GPS Data, moving on")
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte("OK!"))
 		return
