@@ -55,20 +55,12 @@ func main() {
 
 func query(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("Received a call HTTP, GET Keys:")
-	log.Println(r.URL.Query())
-	log.Println("longitude:", r.URL.Query().Get("kff1005"))
-	log.Println("latitude:", r.URL.Query().Get("kff1006"))
-	log.Println("elevation:", r.URL.Query().Get("kff1010"))
-	log.Println("user:", r.URL.Query().Get("eml"))
-	// Data are useless if they're not geolocalized or user is not authorized
-	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 || r.URL.Query().Get("eml") == user {
-		log.Println("No GPS Data, moving on")
+	if r.URL.Query().Get("eml") != user {
+		log.Println("Wrong email, moving on")
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte("OK!"))
-		return
 	}
-	// log.Println("longitude:", r.URL.Query().Get("kff1005"), "latitude:", r.URL.Query().Get("kff1006"), "elevation:", r.URL.Query().Get("kff1010"))
+
 	// kff1005 refers to longitude
 	// kff1006 refers to latitude
 	// kff1010 refers to altitude
@@ -81,6 +73,17 @@ func query(w http.ResponseWriter, r *http.Request) {
 	}
 	altitude := strconv.Itoa(int(i * 1000.0))
 	time := r.URL.Query().Get("time")
+
+	log.Println("longitude:", longitude)
+	log.Println("latitude:", latitude)
+	log.Println("elevation: ", altitude)
+	// Data are useless if they're not geolocalized or user is not authorized
+	if longitude == "" || latitude == "" || altitude == "" {
+		log.Println("No GPS Data, moving on")
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte("OK!"))
+		return
+	}
 
 	// query contains all the get parameters
 	query := r.URL.Query()
