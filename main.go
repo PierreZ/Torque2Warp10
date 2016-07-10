@@ -57,8 +57,10 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("Received a call HTTP, GET Keys:")
 	log.Println(r.URL.Query())
-	log.Println("Does eml == user?")
-	log.Println(r.URL.Query().Get("eml") == user)
+	log.Println("longitude:", r.URL.Query().Get("kff1005"))
+	log.Println("latitude:", r.URL.Query().Get("kff1006"))
+	log.Println("elevation:", r.URL.Query().Get("kff1010"))
+	log.Println("user:", r.URL.Query().Get("eml"))
 	// Data are useless if they're not geolocalized or user is not authorized
 	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 || r.URL.Query().Get("eml") == user {
 		log.Println("No GPS Data, moving on")
