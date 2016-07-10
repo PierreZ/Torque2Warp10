@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 )
 
 // GTS is a representation of a Geo Time Series
@@ -46,7 +45,7 @@ var (
 	warp10Endpoint = os.Getenv("WARP10_ENDPOINT")
 	warp10Token    = os.Getenv("WARP10_TOKEN")
 	torqueKeys     TorqueKeys
-	users          Users
+	user           = os.Getenv("ALLOWED_USERS")
 )
 
 func main() {
@@ -57,7 +56,7 @@ func main() {
 func query(w http.ResponseWriter, r *http.Request) {
 
 	// Data are useless if they're not geolocalized or user is not authorized
-	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 || stringInSlice(r.URL.Query().Get("eml"), users) {
+	if len(r.URL.Query().Get("kff1005")) == 0 || len(r.URL.Query().Get("kff1006")) == 0 || len(r.URL.Query().Get("kff1010")) == 0 || r.URL.Query().Get("eml") == user {
 		// log.Println("No GPS Data, moving on")
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte("OK!"))
@@ -118,20 +117,6 @@ func sendToWarp10(gts GTS) {
 // init is used to load a map to bind Torque's keys to appropriate name for metrics
 func init() {
 
-	// Get Allowed users
-	// Env is like this:
-	// email1,email2,email3
-	env := os.Getenv("ALLOWED_USERS")
-	// Split on comma.
-	result := strings.Split(env, ",")
-	for _, user := range result {
-		users = append(users, user)
-	}
-
-	if len(users) == 0 {
-		log.Panicln("No User registered!")
-	}
-
 	// Get Torque Keys
 	torqueKeys = make(map[string]TorqueKey)
 
@@ -168,13 +153,4 @@ func init() {
 			torqueKeys[each[0]] = TorqueKey{each[1], each[2]}
 		}
 	}
-}
-
-func stringInSlice(str string, list []string) bool {
-	for _, v := range list {
-		if v == str {
-			return true
-		}
-	}
-	return false
 }
