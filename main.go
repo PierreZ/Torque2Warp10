@@ -59,6 +59,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 		log.Println("Wrong email, moving on")
 		w.Header().Set("Content-Type", "text/html")
 		w.Write([]byte("OK!"))
+		return
 	}
 
 	// kff1005 refers to longitude
